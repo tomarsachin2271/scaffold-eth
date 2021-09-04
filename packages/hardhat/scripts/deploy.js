@@ -23,7 +23,8 @@ const main = async () => {
 
   // deploy the contract with all the artworks forSale
   // Find more trusted forwarder addresses for differente networks here: https://docs.biconomy.io/misc/contract-addresses#eip-2771-contracts
-  let trustedForwarder = "0x9399BB24DBB5C4b782C70c2969F58716Ebbd6a3b"; // mumbai
+  //let trustedForwarder = "0x9399BB24DBB5C4b782C70c2969F58716Ebbd6a3b"; // mumbai
+  let trustedForwarder = "0x86C80a8aa58e0A4fa09A69624c31Ab2a6CAD56b8"; // matic mainnet
   const yourCollectible = await deploy("YourCollectible", [trustedForwarder]/*,[ bytes32Array ]*/) // <-- add in constructor args like line 19 vvvv
 
   yourCollectible.transferOwnership("0x7f3B192Ab3220940D66236792F3EBDB0e4E74138") //austingriffith.eth

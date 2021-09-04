@@ -59,12 +59,12 @@ const ipfs = ipfsAPI({ host: "ipfs.infura.io", port: "5001", protocol: "https" }
 */
 
 /// 📡 What chain are your contracts deployed to?
-const targetNetwork = NETWORKS.mumbai; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+const targetNetwork = NETWORKS.matic; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 
 // 😬 Sorry for all the console logging
 const DEBUG = true;
 
-const BICONOMY_API_KEY = "6E0Qk3RxE.d4a28bb9-c11b-48c3-9664-bbea2453b711"; // <------- make sure to use the correct API Key as per the network
+const BICONOMY_API_KEY = "eiF0RmuPI.343e2f5f-9300-4a6e-a168-eaed6908e959"; // <------- make sure to use the correct API Key as per the network
 
 // helper function to "Get" from IPFS
 // you usually go content.toString() after this...
