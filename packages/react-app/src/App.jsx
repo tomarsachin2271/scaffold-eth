@@ -354,7 +354,7 @@ function App(props) {
     const provider = await web3Modal.connect();
 
     let gaslessModeFromStorage = localStorage.getItem("GASLESS_MODE");
-    if(!gaslessModeFromStorage || gaslessModeFromStorage === 'false') {
+    if(gaslessModeFromStorage != null && gaslessModeFromStorage === 'false') {
       setInjectedProvider(new ethers.providers.Web3Provider(provider));
     } else {
       let _biconomy = getBiconomy(provider, BICONOMY_API_KEY);
