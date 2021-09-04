@@ -361,6 +361,10 @@ function App(props) {
       _biconomy.onEvent(_biconomy.READY, ()=>{
         console.log(_biconomy.status);
         console.log("Biconomy is READY");
+        notification.info({
+          message: "Gasless Mode is Ready",
+          placement: "bottomRight",
+        });
       }).onEvent(_biconomy.ERROR, (error, message) => {
         console.log("Error while using Biconomy", error);
         console.log(message);
@@ -523,7 +527,7 @@ function App(props) {
                           </div>
                         }
                       >
-                        <a href={"https://opensea.io/assets/"+(readContracts && readContracts.YourCollectible && readContracts.YourCollectible.address)+"/"+item.id} target="_blank">
+                        <a href={"https://opensea.io/assets/matic/"+(readContracts && readContracts.YourCollectible && readContracts.YourCollectible.address)+"/"+item.id} target="_blank">
                         <img src={item.image} />
                         </a>
                         <div>{item.description}</div>

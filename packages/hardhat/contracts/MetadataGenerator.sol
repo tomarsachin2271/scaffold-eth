@@ -46,8 +46,8 @@ library MetadataGenerator {
 
   function tokenURI(uint256 tokenId, bytes3 color, uint256 chubbiness, bool isLucky, string memory svgPath, address owner) internal pure returns (string memory) {
 
-      string memory name = string(abi.encodePacked('Loogie #',tokenId.toString()));
-      string memory description = string(abi.encodePacked('This Loogie is the color #',color.toColor(),' with a chubbiness of ',uint2str(chubbiness),'!!!'));
+      string memory name = string(abi.encodePacked('PLoogie #',tokenId.toString()));
+      string memory description = string(abi.encodePacked('This PLoogie is the color #',color.toColor(),' with a chubbiness of ',uint2str(chubbiness),'!!!'));
       string memory image = Base64.encode(bytes(generateSVGofTokenById(tokenId, color, chubbiness, svgPath, isLucky)));
 
       return
