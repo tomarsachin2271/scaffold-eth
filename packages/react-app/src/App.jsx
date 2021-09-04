@@ -2,17 +2,18 @@ import { LinkOutlined } from "@ant-design/icons";
 import { StaticJsonRpcProvider, Web3Provider } from "@ethersproject/providers";
 import { formatEther, parseEther } from "@ethersproject/units";
 import WalletConnectProvider from "@walletconnect/web3-provider";
-import { Alert, Button, Card, Col, Input, List, Menu, Row } from "antd";
+import { Alert, Button, Card, Col, Input, List, Menu, notification, Row } from "antd";
 import "antd/dist/antd.css";
 import { useUserAddress } from "eth-hooks";
-import { utils } from "ethers";
+import { utils, ethers } from "ethers";
+import { Biconomy } from "@biconomy/mexa";
 import React, { useCallback, useEffect, useState } from "react";
 import ReactJson from "react-json-view";
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import StackGrid from "react-stack-grid";
 import Web3Modal from "web3modal";
 import "./App.css";
-import assets from "./assets.js";
+// import assets from "./assets.js";
 import { Account, Address, AddressInput, Contract, Faucet, GasGauge, Header, Ramp, ThemeSwitch } from "./components";
 import { DAI_ABI, DAI_ADDRESS, INFURA_ID, NETWORK, NETWORKS } from "./constants";
 import { Transactor } from "./helpers";
@@ -36,7 +37,7 @@ const ipfsAPI = require("ipfs-http-client");
 
 const ipfs = ipfsAPI({ host: "ipfs.infura.io", port: "5001", protocol: "https" });
 
-console.log("📦 Assets: ", assets);
+// console.log("📦 Assets: ", assets);
 
 /*
     Welcome to 🏗 scaffold-eth !
@@ -58,10 +59,12 @@ console.log("📦 Assets: ", assets);
 */
 
 /// 📡 What chain are your contracts deployed to?
-const targetNetwork = NETWORKS.mainnet; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
+const targetNetwork = NETWORKS.mumbai; // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 
 // 😬 Sorry for all the console logging
 const DEBUG = true;
+
+const BICONOMY_API_KEY = "6E0Qk3RxE.d4a28bb9-c11b-48c3-9664-bbea2453b711"; // <------- make sure to use the correct API Key as per the network
 
 // helper function to "Get" from IPFS
 // you usually go content.toString() after this...
@@ -120,6 +123,7 @@ function App(props) {
 
   const logoutOfWeb3Modal = async () => {
      await web3Modal.clearCachedProvider();
+     setBiconomy();
      if (injectedProvider && injectedProvider.provider && typeof injectedProvider.provider.disconnect == "function") {
        await injectedProvider.provider.disconnect();
      }
@@ -129,6 +133,8 @@ function App(props) {
   };
 
   const [injectedProvider, setInjectedProvider] = useState();
+  const [biconomy, setBiconomy] = useState();
+
   /* 💵 This hook will get the price of ETH from 🦄 Uniswap: */
   const price = useExchangePrice(targetNetwork, mainnetProvider);
 
@@ -312,9 +318,58 @@ function App(props) {
     );
   }
 
+  const getBiconomy = (provider, apiKey) => {
+    return new Biconomy(new ethers.providers.Web3Provider(provider), {
+      apiKey: apiKey,
+      debug: true
+    });
+  }
+
+  const toggleGaslessMode = async (gaslessMode) => {
+    const provider = await web3Modal.connect();
+
+    if(gaslessMode) {
+      let _biconomy = getBiconomy(provider, BICONOMY_API_KEY);
+      _biconomy.onEvent(_biconomy.READY, ()=>{
+        console.log(_biconomy.status);
+        console.log("Biconomy is READY");
+        notification.info({
+          message: "Gasless Mode is Ready",
+          placement: "bottomRight",
+        });
+      }).onEvent(_biconomy.ERROR, (error, message) => {
+        console.log("Error while using Biconomy", error);
+        console.log(message);
+      });
+  
+      setBiconomy(_biconomy);
+  
+      setInjectedProvider(new ethers.providers.Web3Provider(_biconomy));
+    } else {
+      setInjectedProvider(new ethers.providers.Web3Provider(provider));
+    }
+  }
+
   const loadWeb3Modal = useCallback(async () => {
     const provider = await web3Modal.connect();
-    setInjectedProvider(new Web3Provider(provider));
+
+    let gaslessModeFromStorage = localStorage.getItem("GASLESS_MODE");
+    if(!gaslessModeFromStorage || gaslessModeFromStorage === 'false') {
+      setInjectedProvider(new ethers.providers.Web3Provider(provider));
+    } else {
+      let _biconomy = getBiconomy(provider, BICONOMY_API_KEY);
+      _biconomy.onEvent(_biconomy.READY, ()=>{
+        console.log(_biconomy.status);
+        console.log("Biconomy is READY");
+      }).onEvent(_biconomy.ERROR, (error, message) => {
+        console.log("Error while using Biconomy", error);
+        console.log(message);
+      });
+  
+      setBiconomy(_biconomy);
+  
+      setInjectedProvider(new ethers.providers.Web3Provider(_biconomy));
+    }
   }, [setInjectedProvider]);
 
   useEffect(() => {
@@ -371,23 +426,23 @@ function App(props) {
   useEffect(() => {
     const updateYourCollectibles = async () => {
       const assetUpdate = [];
-      for (const a in assets) {
-        try {
-          /*const forSale = await readContracts.YourCollectible.forSale(utils.id(a));
-          let owner;
-          if (!forSale) {
-            const tokenId = await readContracts.YourCollectible.uriToTokenId(utils.id(a));
-            owner = await readContracts.YourCollectible.ownerOf(tokenId);
-          }
-          assetUpdate.push({ id: a, ...assets[a], forSale, owner });*/
-        } catch (e) {
-          console.log(e);
-        }
-      }
+      // for (const a in assets) {
+      //   try {
+      //     /*const forSale = await readContracts.YourCollectible.forSale(utils.id(a));
+      //     let owner;
+      //     if (!forSale) {
+      //       const tokenId = await readContracts.YourCollectible.uriToTokenId(utils.id(a));
+      //       owner = await readContracts.YourCollectible.ownerOf(tokenId);
+      //     }
+      //     assetUpdate.push({ id: a, ...assets[a], forSale, owner });*/
+      //   } catch (e) {
+      //     console.log(e);
+      //   }
+      // }
       setLoadedAssets(assetUpdate);
     };
     if (readContracts && readContracts.YourCollectible) updateYourCollectibles();
-  }, [assets, readContracts, transferEvents]);
+  }, [readContracts, transferEvents]);
 
   const galleryList = [];
 
@@ -406,7 +461,7 @@ function App(props) {
               }}
               to="/"
             >
-              Your Loogies
+              Your PLoogies
             </Link>
           </Menu.Item>
           <Menu.Item key="/debug">
@@ -431,8 +486,18 @@ function App(props) {
 
             <div style={{ maxWidth: 820, margin: "auto", marginTop: 32, paddingBottom: 32 }}>
               {isSigner?(
-                <Button type={"primary"} onClick={()=>{
-                  tx( writeContracts.YourCollectible.mintItem() )
+                <Button type={"primary"} onClick={async ()=>{
+                  if(biconomy && biconomy.status !== biconomy.READY) {
+                    notification.info({
+                      message: "Please wait for gasless mode to initialize",
+                      placement: "bottomRight",
+                    });
+                    return;
+                  }
+                  let rawTransaction = await writeContracts.YourCollectible.populateTransaction.mintItem();
+                  rawTransaction.signatureType="EIP712_SIGN";
+                  tx( rawTransaction )
+
                 }}>MINT</Button>
               ):(
                 <Button type={"primary"} onClick={loadWeb3Modal}>CONNECT WALLET</Button>
@@ -501,7 +566,9 @@ function App(props) {
               🛠 built with <a href="https://github.com/austintgriffith/scaffold-eth" target="_blank">🏗 scaffold-eth</a>
 
               🍴 <a href="https://github.com/austintgriffith/scaffold-eth" target="_blank">Fork this repo</a> and build a cool SVG NFT!
-
+              <div>
+                Powered By <a href="https://biconomy.io">Biconomy</a>
+              </div>
             </div>
           </Route>
           <Route path="/debug">
@@ -532,6 +599,7 @@ function App(props) {
           mainnetProvider={mainnetProvider}
           price={price}
           web3Modal={web3Modal}
+          toggleGaslessMode={toggleGaslessMode}
           loadWeb3Modal={loadWeb3Modal}
           logoutOfWeb3Modal={logoutOfWeb3Modal}
           blockExplorer={blockExplorer}

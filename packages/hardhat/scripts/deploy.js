@@ -22,9 +22,11 @@ const main = async () => {
   console.log(" \n")*/
 
   // deploy the contract with all the artworks forSale
-  const yourCollectible = await deploy("YourCollectible"/*,[ bytes32Array ]*/) // <-- add in constructor args like line 19 vvvv
+  // Find more trusted forwarder addresses for differente networks here: https://docs.biconomy.io/misc/contract-addresses#eip-2771-contracts
+  let trustedForwarder = "0x9399BB24DBB5C4b782C70c2969F58716Ebbd6a3b"; // mumbai
+  const yourCollectible = await deploy("YourCollectible", [trustedForwarder]/*,[ bytes32Array ]*/) // <-- add in constructor args like line 19 vvvv
 
-  yourCollectible.transferOwnership("0x34aA3F359A9D614239015126635CE7732c18fDF3") //austingriffith.eth
+  yourCollectible.transferOwnership("0x7f3B192Ab3220940D66236792F3EBDB0e4E74138") //austingriffith.eth
 
   //const yourContract = await ethers.getContractAt('YourContract', "0xaAC799eC2d00C013f1F11c37E654e59B0429DF6A") //<-- if you want to instantiate a version of a contract at a specific address!
   //const secondContract = await deploy("SecondContract")

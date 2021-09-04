@@ -1,8 +1,9 @@
 import { Button } from "antd";
-import React from "react";
+import React, { useEffect } from "react";
 import { useThemeSwitcher } from "react-css-theme-switcher";
 import Address from "./Address";
 import Balance from "./Balance";
+import Switch from '@material-ui/core/Switch';
 import Wallet from "./Wallet";
 
 /*
@@ -38,7 +39,7 @@ import Wallet from "./Wallet";
   - Provide blockExplorer={blockExplorer}, click on address and get the link
               (ex. by default "https://etherscan.io/" or for xdai "https://blockscout.com/poa/xdai/")
 */
-
+const GASLESS_MODE_STORAGE_KEY = "GASLESS_MODE";
 export default function Account({
   address,
   userProvider,
@@ -50,8 +51,30 @@ export default function Account({
   loadWeb3Modal,
   logoutOfWeb3Modal,
   blockExplorer,
-  isSigner
+  isSigner,
+  toggleGaslessMode
 }) {
+  const [enableGaslessMode, setGaslessMode] = React.useState(true);
+
+  useEffect(()=>{
+    let gaslessModeFromStorage = localStorage.getItem(GASLESS_MODE_STORAGE_KEY);
+    if(gaslessModeFromStorage && gaslessModeFromStorage === 'false') {
+      setGaslessMode(false);
+      if(toggleGaslessMode) {
+        toggleGaslessMode(false);
+      }
+    }
+  },[])
+  const onSwitchGaslessMode = (event) => {
+    let value = event.target.checked;
+    setGaslessMode(value);
+    localStorage.setItem(GASLESS_MODE_STORAGE_KEY, value);
+
+    if(toggleGaslessMode) {
+      toggleGaslessMode(value);
+    }
+  };
+
   const modalButtons = [];
   if (web3Modal) {
     if (web3Modal.cachedProvider) {
@@ -88,6 +111,14 @@ export default function Account({
     ""
   ) : (
     <span>
+      <span>Gasless Mode</span>
+      <Switch
+        checked={enableGaslessMode}
+        onChange={onSwitchGaslessMode}
+        color="primary"
+        name="enableGaslessMode"
+        inputProps={{ 'aria-label': 'primary checkbox' }}
+      />
       {address ? (
         <Address address={address} ensProvider={mainnetProvider} blockExplorer={blockExplorer} />
       ) : (

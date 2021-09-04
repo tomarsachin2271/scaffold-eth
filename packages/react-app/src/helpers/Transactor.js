@@ -38,9 +38,13 @@ export default function Transactor(provider, gasPrice, etherscan) {
 
       try {
         let result;
+        console.log(tx);
         if (tx instanceof Promise) {
           console.log("AWAITING TX", tx);
           result = await tx;
+        } else if(tx && tx.signatureType) {
+          let txHash = await provider.send("eth_sendTransaction", [tx]);
+          result = {hash: txHash};
         } else {
           if (!tx.gasPrice) {
             tx.gasPrice = gasPrice || parseUnits("4.1", "gwei");
@@ -74,10 +78,17 @@ export default function Transactor(provider, gasPrice, etherscan) {
       } catch (e) {
         console.log(e);
         console.log("Transaction Error:", e.message);
-        notification.error({
-          message: "Transaction Error",
-          description: e.message,
-        });
+        if(e.message.indexOf("Error while gas estimation") > -1) {
+          notification.error({
+            message: "Transaction Error",
+            description: "Please try again in few seconds",
+          });
+        } else {
+          notification.error({
+            message: "Transaction Error",
+            description: e.message,
+          });
+        }
       }
     };
   }
